@@ -9,6 +9,8 @@ var fieldsForm = document.querySelectorAll('.ad-form__element');
 var selectTypeHousing = adForm.elements.type;
 var inputPrice = adForm.elements.price;
 var selectTime = adForm.querySelector('.ad-form__element--time');
+var selectRooms = adForm.elements.rooms;
+var selectCapacity = adForm.elements.capacity;
 
 function changeOptionType() {
   var selectedOption = selectTypeHousing.options[selectTypeHousing.selectedIndex];
@@ -41,6 +43,50 @@ var synchOptionIndex = function (evt) {
     }
   }
 };
+
+function setOptionCapacity() {
+  var selectedOption = selectRooms.options[selectRooms.selectedIndex];
+  switch (selectedOption.value) {
+    case '1':
+      for (var i = 0; i < selectCapacity.length; i++) {
+        if (selectCapacity[i].value !== '1') {
+          selectCapacity[i].classList.add('hidden');
+        } else {
+          selectCapacity[i].classList.remove('hidden');
+        }
+      }
+      break;
+    case '2':
+      for (i = 0; i < selectCapacity.length; i++) {
+        if (selectCapacity[i].value !== '1' && selectCapacity[i].value !== '2') {
+          selectCapacity[i].classList.add('hidden');
+        } else {
+          selectCapacity[i].classList.remove('hidden');
+        }
+      }
+      break;
+    case '3':
+      for (i = 0; i < selectCapacity.length; i++) {
+        if (selectCapacity[i].value === '0') {
+          selectCapacity[i].classList.add('hidden');
+        } else {
+          selectCapacity[i].classList.remove('hidden');
+        }
+      }
+      break;
+    case '100':
+      for (i = 0; i < selectCapacity.length; i++) {
+        if (selectCapacity[i].value !== '0') {
+          selectCapacity[i].classList.add('hidden');
+        } else {
+          selectCapacity[i].classList.remove('hidden');
+        }
+      }
+      break;
+  }
+  var index = selectCapacity.querySelector('option:not(.hidden)').index;
+  selectCapacity.selectedIndex = index;
+}
 
 function setArtibutDisabled(elements) {
   for (var i = 0; i < elements.length; i++) {
@@ -75,6 +121,8 @@ function setActiveMode() {
   setArtibutDisabled(fieldsForm);
   selectTypeHousing.addEventListener('change', changeOptionType);
   selectTime.addEventListener('change', synchOptionIndex);
+  setOptionCapacity();
+  selectRooms.addEventListener('change', setOptionCapacity);
 }
 
 mapPinMain.addEventListener('mouseup', function () {
