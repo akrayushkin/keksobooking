@@ -4,6 +4,30 @@ var mapPinMain = map.querySelector('.map__pin--main');
 var widthMap = map.clientWidth;
 var mapPins = map.querySelector('.map__pins');
 
+var adForm = document.querySelector('.ad-form');
+var fieldsForm = document.querySelectorAll('.ad-form__element');
+
+function setArtibutDisabled(elements) {
+  for (var i = 0; i < elements.length; i++) {
+    if (!elements[i].elements.address && elements[i].disabled) {
+      elements[i].disabled = false;
+    } else {
+      elements[i].disabled = true;
+    }
+  }
+}
+
+setArtibutDisabled(fieldsForm);
+
+function setActiveMode() {
+  map.classList.remove('map--faded');
+  adForm.classList.remove('ad-form--disabled');
+  setArtibutDisabled(fieldsForm);
+}
+
+mapPinMain.addEventListener('mouseup', function () {
+  setActiveMode();
+});
 
 var QUANTITY_AD = 8;
 var TITLE = ['Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец', 'Маленький ужасный дворец', 'Красивый гостевой домик', 'Некрасивый негостеприимный домик', 'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'];
@@ -112,8 +136,6 @@ var fillingMap = function (mapPinList) {
   mapPinList.appendChild(fragment);
 };
 
-fillingMap(mapPins);
-
 var similarAdTemplate = document.querySelector('template')
 .content
 .querySelector('.map__card');
@@ -161,5 +183,3 @@ var renderAd = function (ad) {
 
   return adElement;
 };
-
-map.insertBefore(renderAd(ads[0]), map.querySelector('.map__filters-container'));
