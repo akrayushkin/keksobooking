@@ -6,6 +6,30 @@ var mapPins = map.querySelector('.map__pins');
 
 var adForm = document.querySelector('.ad-form');
 var fieldsForm = document.querySelectorAll('.ad-form__element');
+var selectTypeHousing = adForm.elements.type;
+var inputPrice = adForm.elements.price;
+
+function changeOptionType() {
+  var selectedOption = selectTypeHousing.options[selectTypeHousing.selectedIndex];
+  switch (selectedOption.value) {
+    case 'bungalo':
+      inputPrice.placeholder = '0';
+      inputPrice.min = '0';
+      break;
+    case 'flat':
+      inputPrice.placeholder = '1000';
+      inputPrice.min = '1000';
+      break;
+    case 'house':
+      inputPrice.placeholder = '5000';
+      inputPrice.min = '5000';
+      break;
+    case 'palace':
+      inputPrice.placeholder = '10 000';
+      inputPrice.min = '10000';
+      break;
+  }
+}
 
 function setArtibutDisabled(elements) {
   for (var i = 0; i < elements.length; i++) {
@@ -38,6 +62,7 @@ function setActiveMode() {
   map.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
   setArtibutDisabled(fieldsForm);
+  selectTypeHousing.addEventListener('change', changeOptionType);
 }
 
 mapPinMain.addEventListener('mouseup', function () {
