@@ -8,6 +8,7 @@ var adForm = document.querySelector('.ad-form');
 var fieldsForm = document.querySelectorAll('.ad-form__element');
 var selectTypeHousing = adForm.elements.type;
 var inputPrice = adForm.elements.price;
+var selectTime = adForm.querySelector('.ad-form__element--time');
 
 function changeOptionType() {
   var selectedOption = selectTypeHousing.options[selectTypeHousing.selectedIndex];
@@ -30,6 +31,16 @@ function changeOptionType() {
       break;
   }
 }
+
+var synchOptionIndex = function (evt) {
+  var selected = evt.target.selectedIndex;
+  var children = this.children;
+  for (var i = 0; i < children.length; i++) {
+    if (typeof children[i].selectedIndex !== 'undefined') {
+      children[i].selectedIndex = selected;
+    }
+  }
+};
 
 function setArtibutDisabled(elements) {
   for (var i = 0; i < elements.length; i++) {
@@ -63,6 +74,7 @@ function setActiveMode() {
   adForm.classList.remove('ad-form--disabled');
   setArtibutDisabled(fieldsForm);
   selectTypeHousing.addEventListener('change', changeOptionType);
+  selectTime.addEventListener('change', synchOptionIndex);
 }
 
 mapPinMain.addEventListener('mouseup', function () {
