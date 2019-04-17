@@ -4,6 +4,132 @@ var mapPinMain = map.querySelector('.map__pin--main');
 var widthMap = map.clientWidth;
 var mapPins = map.querySelector('.map__pins');
 
+var adForm = document.querySelector('.ad-form');
+var fieldsForm = document.querySelectorAll('.ad-form__element');
+var selectTypeHousing = adForm.elements.type;
+var inputPrice = adForm.elements.price;
+var selectTime = adForm.querySelector('.ad-form__element--time');
+var selectRooms = adForm.elements.rooms;
+var selectCapacity = adForm.elements.capacity;
+
+function changeOptionType() {
+  var selectedOption = selectTypeHousing.options[selectTypeHousing.selectedIndex];
+  switch (selectedOption.value) {
+    case 'bungalo':
+      inputPrice.placeholder = '0';
+      inputPrice.min = '0';
+      break;
+    case 'flat':
+      inputPrice.placeholder = '1000';
+      inputPrice.min = '1000';
+      break;
+    case 'house':
+      inputPrice.placeholder = '5000';
+      inputPrice.min = '5000';
+      break;
+    case 'palace':
+      inputPrice.placeholder = '10 000';
+      inputPrice.min = '10000';
+      break;
+  }
+}
+
+var synchOptionIndex = function (evt) {
+  var selected = evt.target.selectedIndex;
+  var children = this.children;
+  for (var i = 0; i < children.length; i++) {
+    if (typeof children[i].selectedIndex !== 'undefined') {
+      children[i].selectedIndex = selected;
+    }
+  }
+};
+
+function setOptionCapacity() {
+  var selectedOption = selectRooms.options[selectRooms.selectedIndex];
+  switch (selectedOption.value) {
+    case '1':
+      for (var i = 0; i < selectCapacity.length; i++) {
+        if (selectCapacity[i].value !== '1') {
+          selectCapacity[i].classList.add('hidden');
+        } else {
+          selectCapacity[i].classList.remove('hidden');
+        }
+      }
+      break;
+    case '2':
+      for (i = 0; i < selectCapacity.length; i++) {
+        if (selectCapacity[i].value !== '1' && selectCapacity[i].value !== '2') {
+          selectCapacity[i].classList.add('hidden');
+        } else {
+          selectCapacity[i].classList.remove('hidden');
+        }
+      }
+      break;
+    case '3':
+      for (i = 0; i < selectCapacity.length; i++) {
+        if (selectCapacity[i].value === '0') {
+          selectCapacity[i].classList.add('hidden');
+        } else {
+          selectCapacity[i].classList.remove('hidden');
+        }
+      }
+      break;
+    case '100':
+      for (i = 0; i < selectCapacity.length; i++) {
+        if (selectCapacity[i].value !== '0') {
+          selectCapacity[i].classList.add('hidden');
+        } else {
+          selectCapacity[i].classList.remove('hidden');
+        }
+      }
+      break;
+  }
+  var index = selectCapacity.querySelector('option:not(.hidden)').index;
+  selectCapacity.selectedIndex = index;
+}
+
+function setArtibutDisabled(elements) {
+  for (var i = 0; i < elements.length; i++) {
+    if (!elements[i].elements.address && elements[i].disabled) {
+      elements[i].disabled = false;
+    } else {
+      elements[i].disabled = true;
+    }
+  }
+}
+
+setArtibutDisabled(fieldsForm);
+
+var MARK_POINTER_HEIGHT = 19;
+var fieldAddress = document.querySelector('#address');
+
+function setValueAddress() {
+  var locationX = Math.round(mapPinMain.offsetLeft + mapPinMain.offsetWidth / 2);
+  var locationY = mapPinMain.offsetTop + mapPinMain.offsetHeight + MARK_POINTER_HEIGHT;
+  if (map.classList.contains('map--faded')) {
+    locationY = Math.round(mapPinMain.offsetTop + mapPinMain.offsetHeight / 2);
+  }
+
+  fieldAddress.value = locationX + ', ' + locationY;
+}
+
+setValueAddress();
+
+function setActiveMode() {
+  map.classList.remove('map--faded');
+  adForm.classList.remove('ad-form--disabled');
+  setArtibutDisabled(fieldsForm);
+  selectTypeHousing.addEventListener('change', changeOptionType);
+  selectTime.addEventListener('change', synchOptionIndex);
+  setOptionCapacity();
+  selectRooms.addEventListener('change', setOptionCapacity);
+}
+
+mapPinMain.addEventListener('mouseup', function () {
+  setActiveMode();
+  setValueAddress();
+  fillingMap(mapPins);
+});
 
 var QUANTITY_AD = 8;
 var TITLE = ['Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец', 'Маленький ужасный дворец', 'Красивый гостевой домик', 'Некрасивый негостеприимный домик', 'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'];
@@ -102,17 +228,43 @@ var renderMapPin = function (pin) {
   return mapPin;
 };
 
+var ESC_KEYCODE = 27;
+
+var openPopupEscPress = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    closeCardAd();
+  }
+};
+
+function closeCardAd() {
+  var popupCardAd = map.querySelector('.map__card.popup');
+  if (popupCardAd) {
+    popupCardAd.remove();
+  }
+  document.removeEventListener('keydown', openPopupEscPress);
+}
+
+function displayAd(num) {
+  closeCardAd();
+  map.insertBefore(renderAd(ads[num]), map.querySelector('.map__filters-container'));
+  map.querySelector('.popup__close').addEventListener('click', closeCardAd);
+  document.addEventListener('keydown', openPopupEscPress);
+}
+
 var fillingMap = function (mapPinList) {
   var fragment = document.createDocumentFragment();
 
   for (var i = 0; i < ads.length; i++) {
-    fragment.appendChild(renderMapPin(ads[i]));
+    var tempPin = fragment.appendChild(renderMapPin(ads[i]));
+    (function (i) {
+      tempPin.addEventListener('click', function () {
+        displayAd(i);
+      });
+    })(i);
   }
 
   mapPinList.appendChild(fragment);
 };
-
-fillingMap(mapPins);
 
 var similarAdTemplate = document.querySelector('template')
 .content
@@ -161,5 +313,3 @@ var renderAd = function (ad) {
 
   return adElement;
 };
-
-map.insertBefore(renderAd(ads[0]), map.querySelector('.map__filters-container'));
