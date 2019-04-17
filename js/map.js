@@ -19,6 +19,21 @@ function setArtibutDisabled(elements) {
 
 setArtibutDisabled(fieldsForm);
 
+var MARK_POINTER_HEIGHT = 19;
+var fieldAddress = document.querySelector('#address');
+
+function setValueAddress() {
+  var locationX = Math.round(mapPinMain.offsetLeft + mapPinMain.offsetWidth / 2);
+  var locationY = mapPinMain.offsetTop + mapPinMain.offsetHeight + MARK_POINTER_HEIGHT;
+  if (map.classList.contains('map--faded')) {
+    locationY = Math.round(mapPinMain.offsetTop + mapPinMain.offsetHeight / 2);
+  }
+
+  fieldAddress.value = locationX + ', ' + locationY;
+}
+
+setValueAddress();
+
 function setActiveMode() {
   map.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
@@ -27,6 +42,7 @@ function setActiveMode() {
 
 mapPinMain.addEventListener('mouseup', function () {
   setActiveMode();
+  setValueAddress();
 });
 
 var QUANTITY_AD = 8;
