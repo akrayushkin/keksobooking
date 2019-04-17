@@ -1,7 +1,9 @@
 'use strict';
 var map = document.querySelector('.map');
-
+var mapPinMain = map.querySelector('.map__pin--main');
 var widthMap = map.clientWidth;
+var mapPins = map.querySelector('.map__pins');
+
 
 var QUANTITY_AD = 8;
 var TITLE = ['Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец', 'Маленький ужасный дворец', 'Красивый гостевой домик', 'Некрасивый негостеприимный домик', 'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'];
@@ -85,3 +87,29 @@ function createSimilarAd(quantity) {
 }
 
 var ads = createSimilarAd(QUANTITY_AD);
+
+var mapPinTemplate = document.querySelector('template')
+.content
+.querySelector('.map__pin');
+
+var renderMapPin = function (pin) {
+  var mapPin = mapPinTemplate.cloneNode(true);
+
+  mapPin.style = 'left: ' + pin.location.x + 'px; top: ' + pin.location.y + 'px';
+  mapPin.querySelector('img').src = pin.author.avatar;
+  mapPin.querySelector('img').alt = pin.offer.title;
+
+  return mapPin;
+};
+
+var fillingMap = function (mapPinList) {
+  var fragment = document.createDocumentFragment();
+
+  for (var i = 0; i < ads.length; i++) {
+    fragment.appendChild(renderMapPin(ads[i]));
+  }
+
+  mapPinList.appendChild(fragment);
+};
+
+fillingMap(mapPins);
