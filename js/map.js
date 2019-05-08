@@ -3,6 +3,15 @@ var map = document.querySelector('.map');
 var mapPinMain = map.querySelector('.map__pin--main');
 var widthMap = map.clientWidth;
 var mapPins = map.querySelector('.map__pins');
+var mapCoords = getCoords(mapPins);
+var markPointerHeight = parseInt(window.getComputedStyle(mapPinMain, ':after').height, 10);
+
+var mapPinLimits = {
+  top: mapCoords.top + 110,
+  right: mapCoords.left + mapCoords.width - mapPinMain.offsetWidth,
+  bottom: mapCoords.top + mapCoords.height - mapPinMain.offsetHeight - markPointerHeight,
+  left: mapCoords.left
+};
 
 var adForm = document.querySelector('.ad-form');
 var fieldsForm = document.querySelectorAll('.ad-form__element');
@@ -100,12 +109,11 @@ function setArtibutDisabled(elements) {
 
 setArtibutDisabled(fieldsForm);
 
-var MARK_POINTER_HEIGHT = 19;
 var fieldAddress = document.querySelector('#address');
 
 function setValueAddress() {
   var locationX = Math.round(mapPinMain.offsetLeft + mapPinMain.offsetWidth / 2);
-  var locationY = mapPinMain.offsetTop + mapPinMain.offsetHeight + MARK_POINTER_HEIGHT;
+  var locationY = mapPinMain.offsetTop + mapPinMain.offsetHeight + markPointerHeight;
   if (map.classList.contains('map--faded')) {
     locationY = Math.round(mapPinMain.offsetTop + mapPinMain.offsetHeight / 2);
   }
@@ -125,10 +133,83 @@ function setActiveMode() {
   selectRooms.addEventListener('change', setOptionCapacity);
 }
 
-mapPinMain.addEventListener('mouseup', function () {
-  setActiveMode();
-  setValueAddress();
-  fillingMap(mapPins);
+function getCoords(elem) {
+  var box = elem.getBoundingClientRect();
+
+  var top = box.top + window.pageYOffset;
+  var left = box.left + window.pageXOffset;
+  var width = box.width;
+  var height = box.height;
+
+  return {
+    top: top,
+    left: left,
+    width: width,
+    height: height
+  };
+}
+
+mapPinMain.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+  if (map.classList.contains('map--faded')) {
+    setActiveMode();
+    fillingMap(mapPins);
+  }
+  mapPinMain.style.zIndex = 1000;
+
+  var dragged = false;
+
+  var mapPinMainCoords = getCoords(mapPinMain);
+  var shift = {
+    x: evt.pageX - mapPinMainCoords.left,
+    y: evt.pageY - mapPinMainCoords.top
+  };
+
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+    dragged = true;
+
+    var newCoords = {
+      x: moveEvt.pageX - shift.x,
+      y: moveEvt.pageY - shift.y
+    };
+
+    if (newCoords.x < mapPinLimits.left) {
+      newCoords.x = mapPinLimits.left;
+    }
+    if (newCoords.x > mapPinLimits.right) {
+      newCoords.x = mapPinLimits.right;
+    }
+    if (newCoords.y < mapPinLimits.top) {
+      newCoords.y = mapPinLimits.top;
+    }
+    if (newCoords.y > mapPinLimits.bottom) {
+      newCoords.y = mapPinLimits.bottom;
+    }
+
+    mapPinMain.style.left = newCoords.x - mapCoords.left + 'px';
+    mapPinMain.style.top = newCoords.y - mapCoords.top + 'px';
+
+    setValueAddress();
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+
+    if (dragged) {
+      var onClickPreventDefault = function (evt) {
+        evt.preventDefault();
+        mapPinMain.removeEventListener('click', onClickPreventDefault);
+      };
+      mapPinMain.addEventListener('click', onClickPreventDefault);
+    }
+    setValueAddress();
+  };
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
 });
 
 var QUANTITY_AD = 8;
@@ -203,8 +284,8 @@ function createSimilarAd(quantity) {
         photos: getArrRandom(PHOTOS)
       },
       location: {
-        x: getRandomInt(20, widthMap - 20),
-        y: getRandomInt(130, 630)
+        x: getRandomInt(0, widthMap - 25),
+        y: getRandomInt(mapPinLimits.top, mapPinLimits.bottom)
       }
     };
     adArray.push(ad);
@@ -256,9 +337,9 @@ var fillingMap = function (mapPinList) {
 
   for (var i = 0; i < ads.length; i++) {
     var tempPin = fragment.appendChild(renderMapPin(ads[i]));
-    (function (i) {
+    (function (index) {
       tempPin.addEventListener('click', function () {
-        displayAd(i);
+        displayAd(index);
       });
     })(i);
   }
