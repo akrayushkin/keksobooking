@@ -45,6 +45,13 @@
         top: top,
         left: left
       };
+    },
+
+    deleteElement: function (elem) {
+      var deletedElem = document.querySelector(elem);
+      if (deletedElem) {
+        deletedElem.remove();
+      }
     }
   };
 })();
