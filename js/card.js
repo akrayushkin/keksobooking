@@ -65,9 +65,9 @@
     document.removeEventListener('keydown', openPopupEscPress);
   }
 
-  window.card = function (num) {
+  window.card = function (pin) {
     closeCardAd();
-    map.insertBefore(renderAd(window.mapData[num]), map.querySelector('.map__filters-container'));
+    map.insertBefore(renderAd(pin), map.querySelector('.map__filters-container'));
     map.querySelector('.popup__close').addEventListener('click', closeCardAd);
     document.addEventListener('keydown', openPopupEscPress);
   };
